@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <title>{{ title }}</title>
+    </head>
+
+    <body>
+        <div>
+            <div>
+                <h1>{{ title }}</h1>
+                <div>
+                    <p>The below analysis shows the number of people who had a
+                        code recorded in their primary care record from <a
+                            href="{{ codelist_1_link }}"> this <strong>{{
+                                codelist_1_name }}</strong>
+                            codelist</a> each month in the period between {{
+                        start_date }} and {{ end_date }} who also had a code
+                        recorded from <a href="{{ codelist_2_link }}"> this
+                            codelist for
+                            <strong>{{ codelist_2_name }}</strong></a> in the
+                        same month or up to <strong>{{ time_value }} {{
+                            time_scale }} {{ time_event }}</strong> the last day
+                        of the month.
+                        {% if breakdowns|length >0 %}
+                        A breakdown of this measure by
+                        {% for b in breakdowns %}
+                        <span>
+                            <strong>{{ b.title|lower }}</strong>
+                            {% if not loop.last %},{% endif %}
+                        </span>
+                        {% endfor %} is also provided.
+                        {% endif %}
+
+                        For each month between {{ start_date }} and {{ end_date
+                        }}, <strong>{{ population }}</strong> at the start of
+                        the month in OpenSAFELY-TPP (~40% of England) are
+                        included.
+                    </p>
+
+
+                </div>
+
+                <div>
+                    <h2>Table of contents</h2>
+                    <ul>
+                    <li><a href="#measure-summary">Measure summary counts</a></li>
+                    <li><a href="#practice-level-variation">Practice level variation</a></li>
+                    <li><a href="#most-common-codes">Most common codes</a></li>
+                    <li><a href="#population-level">Population level chart</a></li>
+                    <li><a href="#breakdowns">Demographic breakdown charts</a></li>
+                    <ul>
+                        {% for b in breakdowns %}
+                        <li><a href="#{{b.title}}">{{ b.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+            </div>
+
+        </div>
+        <div>
+
+            <div>
+                <div id="measure-summary">
+                    <h2>
+                        Measure summary
+                    </h2>
+                    <p>
+                        The table below shows the total number of times the
+                        measure of interest occurred (up to once per month, per
+                        patient), as well as the number of unique patients
+                        experiencing the event between {{ start_date }} and {{
+                        end_date }}. The number of events in the latest month is
+                        also shown.
+                    </p>
+                    <div>
+                        <table border="1">
+                            <thead>
+                                <tr>
+                                    <th>Total events</th>
+                                    <th>Total patients</th>
+                                    <th>Total patients with at least one event</th>
+                                    <th>Events in latest period</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ summary_table_data.total_events }}</td>
+                                    <td>{{ summary_table_data.total_patients }}</td>
+                                    <td>{{ summary_table_data.unique_patients_with_events }}</td>
+                                    <td>{{
+                                        summary_table_data.events_in_latest_period
+                                        }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="practice-level-variation">
+                    <h2>
+                        Practice level variation
+                    </h2>
+                    <p>Practice level variation in this measure is shown below as a decile chart. Each month, practices
+                        are ranked by their rate of coding of <strong>{{ codelist_1_name }} AND {{ codelist_2_name }}</strong>,
+                        from which deciles of activity are calculated.</p>
+                <p>The decile chart below is based on data from <strong>{{ summary_table_data.total_practices }}</strong> practices.</p>
+                    <div>
+                        {{ display_image(decile.path, decile.data) }}
+                        <p><strong>Figure 1</strong>. Decile chart showing
+                            practice level variation for the measure of
+                            interest.</p>
+                    </div>
+                </div>
+                <div id="most-common-codes">
+                    <h2>
+                        Most common codes
+                    </h2>
+                    <p>
+                        The tables below show the most common codes recorded
+                        within both the {{ codelist_1_name }} and the {{
+                        codelist_2_name }} codelists. For each code within
+                        each codelist, the number of times it was recorded in
+                        the period between {{ start_date }} and {{ end_date }}
+                        is calculated. For each code, the percentage
+                        makeup of the total number of events is then calculated.
+                    </p>
+                    <div>
+                        <p><strong>Table 1</strong>. The top 5 most common codes
+                            recorded for {{ codelist_1_name }}.</p>
+                        <table border="1">
+                            {% for row in top_5_1_data %}
+
+                            {% if loop.first %}
+                            <tr>
+                                {% for col in row %}
+                                <th>
+                                    {{ col }}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                {% for col in row %}
+                                <td>
+                                    {{ col }}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endif %}
+
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div>
+                        <p><strong>Table 2</strong>. The top 5 most common codes
+                            recorded for {{ codelist_2_name }}.</p>
+                        <table border="1">
+                            {% for row in top_5_2_data %}
+
+                            {% if loop.first %}
+                            <tr>
+                                {% for col in row %}
+                                <th>
+                                    {{ col }}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            {% else %}
+                            <tr>
+                                {% for col in row %}
+                                <td>
+                                    {{ col }}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endif %}
+
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div id="population-level">
+                    <h2>
+                        Population level rate
+                    </h2>
+                    <p>
+                        The figure below shows the monthly rate per 1000
+                        patients for the measure described above.
+                    </p>
+                    <div>
+                        {{ display_image(population_plot.path, population_plot.data) }}
+                        <p><strong>Figure 2</strong>. The rate per 1000 patients
+                            in the selected population for the measure of
+                            interest.</p>
+                    </div>
+                </div>
+                <div id="breakdowns">
+                    <h2>
+                        Demographic breakdowns
+                    </h2>
+                    <p>
+                        The figures below show the monthly rate per 1000
+                        patients for the measure described above, broken down by
+                        {% for b in breakdowns %}
+                        <span>
+                            {{ b.title|lower }}
+                            {% if not loop.last %},
+                            {% endif %}
+                        </span>
+                        {% endfor %}.
+                    </p>
+                    <div>
+
+                        {% set i=namespace(value=3) %}
+                        {% for b in breakdowns %}
+                        <div id="{{ b.title }}">
+                            <h3>Breakdown by {{ b.title }}</h3>
+                            <p>{{ b.description }}</p>
+                            {% if b.link %}
+                            <p><a href="{{ b.link }}">{{ b.link_description }}</a></p>
+                            {% endif %}
+                            {{ display_image(b.figure.path, b.figure.data) }}
+                            <p><strong>Figure {{ i.value }}</strong>. The rate
+                                per 1000 patients in the selected population for
+                                the measure of interest, broken down by
+                                {{b.title}}</p>
+                            {% set i.value = i.value +1 %}
+                        </div>
+
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+
+</html>
