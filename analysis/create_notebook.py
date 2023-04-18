@@ -31,12 +31,6 @@ def parse_args():
         help="Link to codelist 2",
         required=True,
     )
-    parser.add_argument(
-        "--report-title",
-        type=str,
-        help="Title of report",
-        required=True,
-    )
 
     parser.add_argument(
         "--population",
@@ -67,7 +61,6 @@ def main():
     codelist_1_link = args.codelist_1_link
     codelist_2_description = args.codelist_2_description
     codelist_2_link = args.codelist_2_link
-    title = args.report_title
     demographics_list = args.breakdowns.split(",")
     demographics_string = ", ".join(demographics_list)
     population = args.population
@@ -85,7 +78,6 @@ def main():
     from IPython.display import Markdown as md
 
 
-    title = '{title}'
     demographics_list = {demographics_list}
     codelist_1_description = '{codelist_1_description}'
     codelist_2_description = '{codelist_2_description}'
@@ -111,7 +103,6 @@ def main():
     header = """\
 
     display(
-    md(f"# {title}"),
     md(f"The below analysis shows the rate of coding of **{codelist_1_description} AND {codelist_2_description}** in **{population}**. This analysis uses data available in OpenSAFELY-TPP (~40% of England) between 2019-01-01 and 2022-11-01."),
     md(f"A {codelist_1_description} is defined each month as all patients with a code recorded from [this codelist]({codelist_1_link}). A {codelist_2_description} is defined each month as anyone with a code recorded from [this codelist]({codelist_2_link}) that occurs **{measure_description}**"),
     md(f"A practice level decile chart of this measure is provided, as well as a plot of the populatioin level rate and a breakdown of this measure by **{demographics_string}**."),
@@ -174,7 +165,6 @@ def main():
             imports.format(
                 demographics_list=demographics_list,
                 demographics_string=demographics_string,
-                title=title,
                 codelist_1_description=codelist_1_description,
                 codelist_2_description=codelist_2_description,
                 codelist_1_link=codelist_1_link,

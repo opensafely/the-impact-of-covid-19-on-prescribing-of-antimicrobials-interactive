@@ -82,9 +82,9 @@ def create_top_5_code_table(
         A table of the top `nrows` codes.
     """
 
-    # cast both code columns to str
-    df[code_column] = df[code_column].astype(int).astype(str)
-    code_df[code_column] = code_df[code_column].astype(int).astype(str)
+    # prevent scientific notation for codes by casting to float then int
+    df[code_column] = df[code_column].astype(float).astype(int)
+    code_df[code_column] = code_df[code_column].astype(float).astype(int)
 
     event_counts = group_low_values(df, "num", code_column, low_count_threshold)
 
@@ -102,7 +102,6 @@ def create_top_5_code_table(
 
     # Gets the human-friendly description of the code for the given row
     # e.g. "Systolic blood pressure".
-    code_df[code_column] = code_df[code_column].astype(str)
     code_df = code_df.set_index(code_column).rename(
         columns={term_column: "Description"}
     )
@@ -151,12 +150,13 @@ def main():
     args = parse_args()
     codelist_1_path = args.codelist_1_path
     codelist_2_path = args.codelist_2_path
+    measure_df = pd.read_csv(f"{args.output_dir}/joined/measure_all.csv")
 
-    code_df = pd.read_csv(f"{args.output_dir}/joined/measure_event_1_code_rate.csv")
+    code_df = measure_df.loc[measure_df["group"] == "event_1_code", :]
     codelist = pd.read_csv(f"{codelist_1_path}")
 
     events_per_code = (
-        code_df.groupby("event_1_code")[["event_measure"]].sum().reset_index()
+        code_df.groupby("group_value")[["event_measure"]].sum().reset_index()
     )
     events_per_code.columns = ["code", "num"]
 
@@ -175,12 +175,12 @@ def main():
         f"{args.output_dir}/joined/top_5_code_table_with_counts_1.csv", index=False
     )
 
-    code_df_2 = pd.read_csv(f"{args.output_dir}/joined/measure_event_2_code_rate.csv")
+    code_df_2 = measure_df.loc[measure_df["group"] == "event_2_code", :]
 
     # TODO: support vpids?
     codelist_2 = pd.read_csv(f"{codelist_2_path}")
     events_per_code = (
-        code_df_2.groupby("event_2_code")[["event_measure"]].sum().reset_index()
+        code_df_2.groupby("group_value")[["event_measure"]].sum().reset_index()
     )
     events_per_code.columns = ["code", "num"]
 
