@@ -5,16 +5,16 @@ expectations:
 
 actions:
 
-  generate_study_population_ethnicity_01GYW8TBP1SMCB2HT92BSF2KEB:
+  generate_study_population_ethnicity_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition_ethnicity
       --param end_date="2023-03-31"
-      --output-dir output/01GYW8TBP1SMCB2HT92BSF2KEB --output-format=csv.gz
+      --output-dir output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/01GYW8TBP1SMCB2HT92BSF2KEB/input_ethnicity.csv.gz
+        cohort: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_ethnicity.csv.gz
 
-  generate_study_population_weekly_01GYW8TBP1SMCB2HT92BSF2KEB:
+  generate_study_population_weekly_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition
       --param codelist_1_path="interactive_codelists/codelist_1.csv"
@@ -31,14 +31,14 @@ actions:
       --param population="adults"
       --param breakdowns=""
       --index-date_range="2023-04-10 to 2023-04-10 by week"
-      --output-dir=output/01GYW8TBP1SMCB2HT92BSF2KEB
+      --output-dir=output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ
       --output-format=csv.gz
-      --output-file=output/01GYW8TBP1SMCB2HT92BSF2KEB/input_weekly_2023-04-10.csv.gz
+      --output-file=output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_weekly_2023-04-10.csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/01GYW8TBP1SMCB2HT92BSF2KEB/input_weekly_2023-04-10.csv.gz
+        cohort: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_weekly_2023-04-10.csv.gz
 
-  generate_study_population_01GYW8TBP1SMCB2HT92BSF2KEB:
+  generate_study_population_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: cohortextractor:latest generate_cohort
       --study-definition study_definition
       --param codelist_1_path="interactive_codelists/codelist_1.csv"
@@ -55,24 +55,24 @@ actions:
       --param population="adults"
       --param breakdowns="sex,age,ethnicity,imd,region"
       --index-date-range="2019-09-01 to 2023-03-31 by month"
-      --output-dir=output/01GYW8TBP1SMCB2HT92BSF2KEB
+      --output-dir=output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ
       --output-format=csv.gz
     outputs:
       highly_sensitive:
-        cohort: output/01GYW8TBP1SMCB2HT92BSF2KEB/input_*.csv.gz
+        cohort: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_*.csv.gz
 
-  join_cohorts_01GYW8TBP1SMCB2HT92BSF2KEB:
+  join_cohorts_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
       cohort-joiner:v0.0.38
-        --lhs output/01GYW8TBP1SMCB2HT92BSF2KEB/input_20*.csv.gz
-        --rhs output/01GYW8TBP1SMCB2HT92BSF2KEB/input_ethnicity.csv.gz
-        --output-dir output/01GYW8TBP1SMCB2HT92BSF2KEB/joined
-    needs: [generate_study_population_01GYW8TBP1SMCB2HT92BSF2KEB, generate_study_population_ethnicity_01GYW8TBP1SMCB2HT92BSF2KEB]
+        --lhs output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_20*.csv.gz
+        --rhs output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/input_ethnicity.csv.gz
+        --output-dir output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined
+    needs: [generate_study_population_01GYWGZWA5ZMCCS2SQ6Z26TKVQ, generate_study_population_ethnicity_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       highly_sensitive:
-        cohort: output/01GYW8TBP1SMCB2HT92BSF2KEB/joined/input_20*.csv.gz
+        cohort: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined/input_20*.csv.gz
 
-  generate_measures_01GYW8TBP1SMCB2HT92BSF2KEB:
+  generate_measures_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
       python:latest -m analysis.measures
         --breakdowns=sex
@@ -80,26 +80,26 @@ actions:
         --breakdowns=ethnicity
         --breakdowns=imd
         --breakdowns=region
-        --input-dir="output/01GYW8TBP1SMCB2HT92BSF2KEB/joined"
+        --input-dir="output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined"
 
-    needs: [join_cohorts_01GYW8TBP1SMCB2HT92BSF2KEB]
+    needs: [join_cohorts_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       moderately_sensitive:
-        measure: output/01GYW8TBP1SMCB2HT92BSF2KEB/joined/measure_all.csv
-        decile_measure: output/01GYW8TBP1SMCB2HT92BSF2KEB/joined/measure_practice_rate_deciles.csv
+        measure: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined/measure_all.csv
+        decile_measure: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined/measure_practice_rate_deciles.csv
 
-  top_5_table_01GYW8TBP1SMCB2HT92BSF2KEB:
+  top_5_table_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
       python:latest python analysis/top_5.py
       --codelist-1-path="interactive_codelists/codelist_1.csv"
       --codelist-2-path="interactive_codelists/codelist_2.csv"
-      --output-dir="output/01GYW8TBP1SMCB2HT92BSF2KEB"
-    needs: [generate_measures_01GYW8TBP1SMCB2HT92BSF2KEB]
+      --output-dir="output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ"
+    needs: [generate_measures_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       moderately_sensitive:
-        tables: output/01GYW8TBP1SMCB2HT92BSF2KEB/joined/top_5*.csv
+        tables: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/joined/top_5*.csv
 
-  plot_measure_01GYW8TBP1SMCB2HT92BSF2KEB:
+  plot_measure_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
       python:latest python analysis/plot_measures.py
         --breakdowns=sex
@@ -107,41 +107,41 @@ actions:
         --breakdowns=ethnicity
         --breakdowns=imd
         --breakdowns=region
-        --output-dir output/01GYW8TBP1SMCB2HT92BSF2KEB
-    needs: [generate_measures_01GYW8TBP1SMCB2HT92BSF2KEB]
+        --output-dir output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ
+    needs: [generate_measures_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       moderately_sensitive:
-        measure: output/01GYW8TBP1SMCB2HT92BSF2KEB/plot_measure*.png
-        deciles: output/01GYW8TBP1SMCB2HT92BSF2KEB/deciles_chart.png
+        measure: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/plot_measure*.png
+        deciles: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/deciles_chart.png
 
-  event_counts_01GYW8TBP1SMCB2HT92BSF2KEB:
+  event_counts_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
-      python:latest python analysis/event_counts.py --input-dir="output/01GYW8TBP1SMCB2HT92BSF2KEB" --output-dir="output/01GYW8TBP1SMCB2HT92BSF2KEB"
-    needs: [join_cohorts_01GYW8TBP1SMCB2HT92BSF2KEB, generate_study_population_weekly_01GYW8TBP1SMCB2HT92BSF2KEB]
+      python:latest python analysis/event_counts.py --input-dir="output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ" --output-dir="output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ"
+    needs: [join_cohorts_01GYWGZWA5ZMCCS2SQ6Z26TKVQ, generate_study_population_weekly_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       moderately_sensitive:
-        measure: output/01GYW8TBP1SMCB2HT92BSF2KEB/event_counts.json
+        measure: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/event_counts.json
 
-  generate_report_01GYW8TBP1SMCB2HT92BSF2KEB:
+  generate_report_01GYWGZWA5ZMCCS2SQ6Z26TKVQ:
     run: >
       python:latest python analysis/render_report.py
-      --output-dir="output/01GYW8TBP1SMCB2HT92BSF2KEB"
+      --output-dir="output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ"
       --population="adults"
       --breakdowns=sex
       --breakdowns=age
       --breakdowns=ethnicity
       --breakdowns=imd
       --breakdowns=region
-      --codelist-1-name="Doxycycline (tetracyclines)"
+      --codelist-1-name="Amoxicillin (oral)"
       --codelist-2-name="Oral prednisolone codes"
-      --codelist-1-link="user/alexorlek/doxycycline-tetracyclines/4458c45a"
+      --codelist-1-link="opensafely/amoxicillin-oral/164af813"
       --codelist-2-link="primis-covid19-vacc-uptake/astrxm2/v1.5.3"
       --time-value="0"
       --time-scale="weeks"
       --time-event="before"
       --start-date="2019-09-01"
       --end-date="2023-03-31"
-    needs: [event_counts_01GYW8TBP1SMCB2HT92BSF2KEB, top_5_table_01GYW8TBP1SMCB2HT92BSF2KEB, plot_measure_01GYW8TBP1SMCB2HT92BSF2KEB]
+    needs: [event_counts_01GYWGZWA5ZMCCS2SQ6Z26TKVQ, top_5_table_01GYWGZWA5ZMCCS2SQ6Z26TKVQ, plot_measure_01GYWGZWA5ZMCCS2SQ6Z26TKVQ]
     outputs:
       moderately_sensitive:
-        notebook: output/01GYW8TBP1SMCB2HT92BSF2KEB/report.html
+        notebook: output/01GYWGZWA5ZMCCS2SQ6Z26TKVQ/report.html
