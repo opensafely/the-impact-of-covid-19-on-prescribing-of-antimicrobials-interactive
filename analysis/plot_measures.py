@@ -6,7 +6,9 @@ from report_utils import deciles_chart, plot_measures
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--breakdowns", help="codelist to use")
+    parser.add_argument(
+        "--breakdowns", action="append", default=[], help="breakdowns to use"
+    )
     parser.add_argument("--output-dir", help="output directory", required=True)
     args = parser.parse_args()
     return args
@@ -14,10 +16,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    if args.breakdowns != "":
-        breakdowns = args.breakdowns.split(",")
-    else:
-        breakdowns = []
+    breakdowns = args.breakdowns
 
     df = pd.read_csv(
         f"{ args.output_dir }/joined/measure_all.csv", parse_dates=["date"]

@@ -22,8 +22,8 @@ def round_to_nearest_10(x):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_dir", type=str, required=True)
-    parser.add_argument("--output_dir", type=str, required=True)
+    parser.add_argument("--input-dir", type=str, required=True)
+    parser.add_argument("--output-dir", type=str, required=True)
     return parser.parse_args()
 
 
@@ -44,6 +44,17 @@ def get_patients_with_events(df):
     return df_subset.loc[:, "patient_id"].unique()
 
 
+def generate_latest_week_range(latest_week_start):
+    latest_week_start = pd.to_datetime(latest_week_start)
+    latest_week_end = latest_week_start + pd.DateOffset(6)
+
+    latest_week_range = (
+        f"{latest_week_start:%Y-%m-%d} - {latest_week_end:%Y-%m-%d} inclusive"
+    )
+
+    return latest_week_range
+
+
 def main():
     args = parse_args()
 
@@ -52,8 +63,9 @@ def main():
     practices = []
     practice_with_events = []
     events = {}
+    events_weekly = {}
 
-    for file in Path(args.input_dir).iterdir():
+    for file in Path(args.input_dir).rglob("*"):
         if match_input_files(file.name):
             date = get_date_input_file(file.name)
             df = pd.read_csv(file)
@@ -72,6 +84,17 @@ def main():
             practices.extend(unique_practices)
             practice_with_events.extend(unique_practices_with_events)
 
+        if match_input_files(file.name, weekly=True):
+            date = get_date_input_file(file.name, weekly=True)
+            df = pd.read_csv(file)
+            df["date"] = date
+            num_events = get_number_of_events(df)
+            events_weekly[date] = num_events
+
+    # there should only be one key in events_weekly, but we take the max anyway
+    latest_week = max(events_weekly.keys())
+    latest_month = max(events.keys())
+    events_in_latest_week = round_to_nearest_100(events_weekly[latest_week])
     total_events = round_to_nearest_100(sum(events.values()))
     total_patients = round_to_nearest_100(len(np.unique(patients)))
     unique_patients_with_events = round_to_nearest_100(
@@ -91,6 +114,9 @@ def main():
             "events_in_latest_period": events_in_latest_period,
             "total_practices": total_practices,
             "total_practices_with_events": total_practices_with_events,
+            "events_in_latest_week": events_in_latest_week,
+            "latest_week": generate_latest_week_range(latest_week),
+            "latest_month": pd.to_datetime(latest_month).strftime("%Y-%m"),
         },
         f"{args.output_dir}/event_counts.json",
     )

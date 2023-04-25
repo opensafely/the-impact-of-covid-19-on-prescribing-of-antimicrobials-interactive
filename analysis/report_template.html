@@ -3,14 +3,14 @@
 
     <head>
         <meta charset="utf-8">
+        <title>OpenSAFELY Report</title>
     </head>
 
     <body>
-        <div>
-            <div>
-                <div>
-                    <h2>Table of contents</h2>
-                    <ul>
+        <main id="interactiveReport">
+            <section class="toc">
+                <h2>Table of contents</h2>
+                <ol>
                     <li><a href="#intro">Measure description</a></li>
                     <li><a href="#limitations">Analysis limitations</a></li>
                     <li><a href="#measure-summary">Measure summary counts</a></li>
@@ -19,188 +19,171 @@
                     <li><a href="#most-common-codes">Most common codes</a></li>
                     {% if breakdowns|length >0 %}
                     <li><a href="#breakdowns">Demographic breakdown charts</a></li>
-                    <ul>
-                        {% for b in breakdowns %}
-                        <li><a href="#{{b.title}}">{{ b.title }}</a></li>
-                        {% endfor %}
-                    </ul>
+                    <li>
+                        <ol>
+                            {% for b in breakdowns %}
+                            <li><a href="#{{ b.title|lower|replace(" ", "-") }}">{{ b.title }}</a></li>
+                            {% endfor %}
+                        </ol>
+                    </li>
                     {% endif %}
-                </div>
+                </ol>
+            </section>
 
-                <div id="intro">
-                    <h2>
-                        Measure description
-                    </h2>
-                    <p>This report shows the monthly recording patterns for a measure
-                        of primary care activity produced using OpenSAFELY Interactive.
-                        This measure is made up of two clinical activities, defined by
-                        the codelists below:
-                    </p>
-                    <ul>
-                        <li>
-                            Codelist 1 - <strong>{{ codelist_1_name }}</strong> (<a
-                                href="{{ codelist_1_link }}">View on OpenCodelists</a>)
-                        </li>
-                        <li>
-                            Codelist 2 - <strong>{{ codelist_2_name }}</strong> (<a
-                                href="{{ codelist_2_link }}">View on OpenCodelists</a>)
-                        </li>
-                    </ul>
-                    <p>
-                        The measure shows the number of people each month who had both a code from
-                        codelist 1 added to their health record and a code from codelist 2 added to
-                        their health record in the same month or up to <strong>{{ time_value }}
-                        {{ time_scale }} {{ time_event }}</strong> the start of that month. This monthly
-                        measure is calculated for the period between <strong>{{ start_date }}</strong>
-                        and <strong>{{ end_date }}</strong>.
-                    </p>
+            <section id="intro">
+                <h2>Measure description</h2>
+                <p>This report shows the monthly recording patterns for a measure
+                    of primary care activity produced using OpenSAFELY Interactive.
+                    This measure is made up of two clinical activities, defined by
+                    the codelists below:
+                </p>
+                <ul>
+                    <li>Codelist 1 - <strong>{{ codelist_1_name }}</strong> (<a href="{{ codelist_1_link }}">View on OpenCodelists</a>)</li>
+                    <li>Codelist 2 - <strong>{{ codelist_2_name }}</strong> (<a href="{{ codelist_2_link }}">View on OpenCodelists</a>)</li>
+                </ul>
+                <p>
+                    The measure shows the number of people each month who had both a code from
+                    codelist 1 added to their health record and a code from codelist 2 added to
+                    their health record in the same month{% if time_value == "0" %}.{% else %} or up to
+                    <strong>{{ time_value }} {{ time_scale }} {{ time_event }}</strong> the start of
+                    that month.{% endif %} This monthly measure is calculated for the period between
+                    <strong>{{ start_date }}</strong> and <strong>{{ end_date }}</strong>.
+                </p>
 
-                    <p>
-                        This measure is calculated for <strong>{{ population }}</strong> using the OpenSAFELY-TPP
-                        dataset, which covers ~40% of England. The monthly rate of this measure is shown below.
-                        {% if breakdowns|length >0 %}
-                        A breakdown of this measure by
-                        {% for b in breakdowns %}
-                        <span>
-                            <strong>{{ b.title|lower }}</strong>
-                            {% if not loop.last %},{% endif %}
-                        </span>
-                        {% endfor %} is also provided.
-                        {% endif %}
-                    </p>
+                <p>
+                    This measure is calculated for <strong>{{ population }}</strong> using the OpenSAFELY-TPP
+                    dataset, which covers ~40% of England. The monthly rate of this measure is shown below.
+                    {% if breakdowns|length >0 %}
+                    A breakdown of this measure by
+                    {% for b in breakdowns %}
+                    <span>
+                        <strong>{{ b.title|lower }}</strong>
+                        {% if not loop.last %},{% endif %}
+                    </span>
+                    {% endfor %} is also provided.
+                    {% endif %}
+                </p>
+            </section>
 
-                </div>
-                <div id="limitations">
-                    <h2>
-                        Analysis limitations
-                    </h2>
-                    <ul>
-                        <li>
-                            With the exception of a small amount of legally restricted data, all occurrences
-                            of clinical codes are available through OpenSAFELY Interactive. However, the results
-                            should be interpreted with caution. Codes recorded in primary care are done so with
-                            the primary purpose of supporting clinical care and so may not reflect the true scale
-                            and breadth of activity. For example, codes recorded in general practice do not necessarily
-                            indicate unique or new events. A patient encounter could generate multiple, similar
-                            codes or a patient may have similar diagnosis codes recorded at multiple time points.
-                            In addition, practices may bulk import codes from other systems; and codes may simply be
-                            recorded in error. The limitations of performing research on secondary use data such as
-                            that used in OpenSAFELY should be understood before drawing conclusions from the results.
-                        </li>
-                        <li>
-                            No attempt is made in this report to understand specific causes and reasons for changes
-                            in the measures shown. Care should be taken when interpreting the results of this analysis,
-                            with consideration to the limitations of the data and the methods used described above. You
-                            may wish to discuss the results of this analysis with an experienced electronic health
-                            records researcher or analyst who understands how clinical activity is coded in general
-                            practice. Alternatively, you may wish to perform your own analysis by writing and deploying
-                            code via <a href="https://www.opensafely.org">OpenSAFELY</a>, which will allow you to explore the data in more detail.
-                        </li>
-                        <li>
-                            The results displayed in OpenSAFELY Interactive reports are automatically generated based
-                            on selected codelists and study parameters. The extent to which analyses capture desired
-                            activity depends entirely on the codelists selected. All the codelists used for OpenSAFELY
-                            Interactive reports are available on OpenCodelists and linked to in this report; these should
-                            be reviewed to understand the scope of the codelists before drawing conclusions from the
-                            results.
-                            <ul>
-                                <li>
-                                    If the chosen codelists represent <strong>diagnoses or demographic features</strong>,
-                                    note that codes may only be entered once for each patient and may not be captured in
-                                    this time period. New codes do not necessarily represent new diagnoses because duplicate
-                                    codes may be added in specific clinical contexts.
-                                </li>
-                                <li>
-                                    If the chosen codelists represent <strong>vaccinations, referrals, maternity records,
-                                    or activities not directly occuring in primary care</strong> , note that some events
-                                    may be recorded in way that are not fully captured by this analysis, and/or are subject
-                                    to limited recording in primary care.
-                                </li>
-                                <li>
-                                    For measures that reflect diagnostic testing, only test results returned to general
-                                    practice are included. This will usually exclude tests requested while a person is in
-                                    hospital or other settings such as a private clinic.
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+            <section id="limitations">
+                <h2>Analysis limitations</h2>
+                <ul>
+                    <li>
+                        With the exception of a small amount of legally restricted data, all occurrences
+                        of clinical codes are available through OpenSAFELY Interactive. However, the results
+                        should be interpreted with caution. Codes recorded in primary care are done so with
+                        the primary purpose of supporting clinical care and so may not reflect the true scale
+                        and breadth of activity. For example, codes recorded in general practice do not necessarily
+                        indicate unique or new events. A patient encounter could generate multiple, similar
+                        codes or a patient may have similar diagnosis codes recorded at multiple time points.
+                        In addition, practices may bulk import codes from other systems; and codes may simply be
+                        recorded in error. The limitations of performing research on secondary use data such as
+                        that used in OpenSAFELY should be understood before drawing conclusions from the results.
+                    </li>
+                    <li>
+                        No attempt is made in this report to understand specific causes and reasons for changes
+                        in the measures shown. Care should be taken when interpreting the results of this analysis,
+                        with consideration to the limitations of the data and the methods used described above. You
+                        may wish to discuss the results of this analysis with an experienced electronic health
+                        records researcher or analyst who understands how clinical activity is coded in general
+                        practice. Alternatively, you may wish to perform your own analysis by writing and deploying
+                        code via <a href="https://www.opensafely.org/">OpenSAFELY</a>, which will allow you to explore the data in more detail.
+                    </li>
+                    <li>
+                        The results displayed in OpenSAFELY Interactive reports are automatically generated based
+                        on selected codelists and study parameters. The extent to which analyses capture desired
+                        activity depends entirely on the codelists selected. All the codelists used for OpenSAFELY
+                        Interactive reports are available on OpenCodelists and linked to in this report; these should
+                        be reviewed to understand the scope of the codelists before drawing conclusions from the
+                        results.
+                        <ul>
+                            <li>
+                                If the chosen codelists represent <strong>diagnoses or demographic features</strong>,
+                                note that codes may only be entered once for each patient and may not be captured in
+                                this time period. New codes do not necessarily represent new diagnoses because duplicate
+                                codes may be added in specific clinical contexts.
+                            </li>
+                            <li>
+                                If the chosen codelists represent <strong>vaccinations, referrals, maternity records,
+                                or activities not directly occurring in primary care</strong> , note that some events
+                                may be recorded in way that are not fully captured by this analysis, and/or are subject
+                                to limited recording in primary care.
+                            </li>
+                            <li>
+                                For measures that reflect diagnostic testing, only test results returned to general
+                                practice are included. This will usually exclude tests requested while a person is in
+                                hospital or other settings such as a private clinic.
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
 
-
-
-                </div>
-        </div>
-        <div>
-
-            <div>
-                <div id="measure-summary">
-                    <h2>
-                        Measure summary
-                    </h2>
-                    <p>The table below shows the total number of times the measure of interest
-                        occurred and the number of unique patients experiencing the event between
-                        {{ start_date }} and {{ end_date }}. The number of events in the latest
-                        complete month and latest week is also shown. An event is defined as a
-                        patient having a code recorded from both codelist 1 and codelist 2 that
-                        satisfies the specified measure logic. A patient can have multiple events,
-                        but a maximum of 1 event per patient is counted each month.
-                    </p>
-
-                    <div>
-                        <p><strong>Table 1</strong>. Summary table showing the total number of patients
+            <section id="measure-summary">
+                <h2>Measure summary</h2>
+                <p>The table below shows the total number of times the measure of interest
+                    occurred and the number of unique patients experiencing the event between
+                    {{ start_date }} and {{ end_date }}. The number of events in the latest
+                    complete month and latest week is also shown. An event is defined as a
+                    patient having a code recorded from both codelist 1 and codelist 2 that
+                    satisfies the specified measure logic. A patient can have multiple events,
+                    but a maximum of 1 event per patient is counted each month.
+                </p>
+                <table>
+                    <caption>
+                        <strong>Table 1</strong>. Summary table showing the total number of patients
                         who meet the measure criteria at some point during the study period, the total
                         number of event throughout the study period (up to one event, per patient, per month),
                         and the number of events in the latest complete month and complete week.
-                    </p>
-                        <table border="1">
-                            <thead>
-                                <tr>
-                                    <th>Total events</th>
-                                    <th>Total patients</th>
-                                    <th>Events in latest period</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{{ summary_table_data.total_events }}</td>
-                                    <td>{{ summary_table_data.total_patients }}</td>
-                                    <td>{{
-                                        summary_table_data.events_in_latest_period
-                                        }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div id="population-level">
-                    <h2>
-                        Population level rate
-                    </h2>
-                    <p>
-                        The figure below shows the monthly rate per 1000
-                        patients for the measure described above.
-                    </p>
-                    <div>
-                        {{ display_image(population_plot.path, population_plot.data) }}
-                        <p><strong>Figure 1</strong>. The monthly rate per 1000 patients
-                            in the selected population for the specified measure between
-                            {{ start_date }} and {{ end_date }}.</p>
-                    </div>
-                </div>
-                <div id="practice-level-variation">
-                    <h2>
-                        Practice level variation
-                    </h2>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>Total events</th>
+                            <th>Total patients</th>
+                            <th>Events in latest month ({{ summary_table_data.latest_month }})</th>
+                            <th>Events in latest week ({{ summary_table_data.latest_week }})</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ summary_table_data.total_events }}</td>
+                            <td>{{ summary_table_data.total_patients }}</td>
+                            <td>{{ summary_table_data.events_in_latest_period }}</td>
+                            <td>{{ summary_table_data.events_in_latest_week }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
 
-                    <p>Practice level variation in this measure is shown below as a decile chart.
-                        Deciles charts provide a way of understanding the variability in a chosen
-                        measure at the level of individual practices. To calculate deciles charts, the
-                        rate of the chosen measure is calculated for each practice each month.
-                        For each month, the practices are then ranked by their rate. From this, the median
-                        (5th decile) practice level rate is calculated as well as the rate for the 10th
-                        percentile etc. The wider the gap between the deciles, the more practice level
-                        variability there is. You can read more about how we use deciles here.
+            <section id="population-level">
+                <h2>Population level rate</h2>
+                <p>
+                    The figure below shows the monthly rate per 1000
+                    patients for the measure described above.
+                </p>
+                <figure>
+                    {{ display_image(population_plot.path, population_plot.data) }}
+                    <figcaption>
+                        <strong>Figure 1</strong>. The monthly rate per 1000 patients
+                        in the selected population for the specified measure between
+                        {{ start_date }} and {{ end_date }}.
+                    </figcaption>
+                </figure>
+            </section>
 
-                    </p>
+            <section id="practice-level-variation">
+                <h2>Practice level variation</h2>
+
+                <p>Practice level variation in this measure is shown below as a decile chart.
+                    Deciles charts provide a way of understanding the variability in a chosen
+                    measure at the level of individual practices. To calculate deciles charts, the
+                    rate of the chosen measure is calculated for each practice each month.
+                    For each month, the practices are then ranked by their rate. From this, the median
+                    (5th decile) practice level rate is calculated as well as the rate for the 10th
+                    percentile etc. The wider the gap between the deciles, the more practice level
+                    variability there is. You can read more about how we use deciles here.
+
+                </p>
 
                 <p>
                     Practices that do not have any registered patients with the measure of interest recorded
@@ -210,122 +193,119 @@
                 </p>
 
 
-                    <div>
-                        {{ display_image(decile.path, decile.data) }}
-                        <p><strong>Figure 2</strong>. Practice level decile chart showing
-                            practice level variation in the rate per 1000 patients who satisfy the
-                            specified measure between {{start_date}} and {{ end_date }}.</p>
-                    </div>
-                </div>
-                <div id="most-common-codes">
-                    <h2>
-                        Most common codes
-                    </h2>
+                <figure>
+                    {{ display_image(decile.path, decile.data) }}
+                    <figcaption>
+                        <strong>Figure 2</strong>. Practice level decile chart showing
+                        practice level variation in the rate per 1000 patients who satisfy the
+                        specified measure between {{ start_date }} and {{ end_date }}.
+                    </figcaption>
+                </figure>
+            </section>
+
+            <section id="most-common-codes">
+                <h2>Most common codes</h2>
+                <p>
+                    The tables below show the most common codes recorded within both the {{ codelist_1_name }} and the
+                    {{ codelist_2_name }} codelists. For each code within each codelist, the number of times it was recorded
+                    in the period between {{ start_date }} and {{ end_date }} is calculated. For each code, the percentage
+                    makeup of the total number of events is then calculated. Note that the code recorded is the latest code
+                    recorded for a given patient in the given period. Where a patient has had multiple codes recorded from
+                    the specified codelists, only the latest code will contribute to the counts in this table.
+                </p>
+                <table>
+                    <caption><strong>Table 2</strong>. The top 5 most common codes recorded for codelist 1 ({{ codelist_1_name }}).</caption>
+                    {% for row in top_5_1_data %}
+                        {% if loop.first %}
+                            <thead>
+                                <tr>
+                                {% for col in row %}
+                                    <th>{{ col }}</th>
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                        {% endif %}
+                    {% endfor %}
+                    {% for row in top_5_1_data %}
+                        <tbody>
+                            {% if not loop.first %}
+                                <tr>
+                                    {% for col in row %}<td>{{ col }}</td>{% endfor %}
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                    {% endfor %}
+                </table>
+
+                <table>
+                    <caption><strong>Table 3</strong>. The top 5 most common codes recorded for codelist 2 ({{ codelist_2_name }}).</caption>
+                    {% for row in top_5_2_data %}
+                        {% if loop.first %}
+                            <thead>
+                                <tr>
+                                {% for col in row %}
+                                    <th>{{ col }}</th>
+                                {% endfor %}
+                                </tr>
+                            </thead>
+                        {% endif %}
+                    {% endfor %}
+                    {% for row in top_5_2_data %}
+                        <tbody>
+                            {% if not loop.first %}
+                                <tr>
+                                    {% for col in row %}<td>{{ col }}</td>{% endfor %}
+                                </tr>
+                            {% endif %}
+                            </tbody>
+                    {% endfor %}
+                </table>
+            </section>
+
+
+            {% if breakdowns|length >0 %}
+            <section id="breakdowns">
+                <h2>Demographic breakdowns</h2>
+                <p>
+                    The figures below show the monthly rate per 1000
+                    patients for the measure described above, broken down by
+                    {% for b in breakdowns %}
+                    <span>
+                        {{ b.title|lower }}
+                        {% if not loop.last %},
+                        {% endif %}
+                    </span>
+                    {% endfor %}.
+                </p>
+
+                {% set i=namespace(value=3) %}
+                {% for b in breakdowns %}
+                <section id="{{ b.title|lower|replace(" ", "-") }}">
+                    <h3>Breakdown by {{ b.title }}</h3>
+                    <p>{{ b.description }}</p>
+
+                    {% if b.link %}
                     <p>
-                        The tables below show the most common codes recorded within both the {{ codelist_1_name }} and the
-                        {{ codelist_2_name }} codelists. For each code within each codelist, the number of times it was recorded
-                        in the period between {{ start_date }} and {{ end_date }} is calculated. For each code, the percentage
-                        makeup of the total number of events is then calculated. Note that the code recorded is the latest code
-                        recorded for a given patient in the given period. Where a patient has had multiple codes recorded from
-                        the specified codelists, only the latest code will contribute to the counts in this table.
+                        <strong>Codelist link: </strong>
+                        <a href="{{ b.link }}">{{ b.link_description }}</a>
                     </p>
-                    <div>
-                        <p><strong>Table 2</strong>. The top 5 most common codes
-                            recorded for codelist 1 ({{ codelist_1_name }}).</p>
-                        <table border="1">
-                            {% for row in top_5_1_data %}
+                    {% endif %}
 
-                            {% if loop.first %}
-                            <tr>
-                                {% for col in row %}
-                                <th>
-                                    {{ col }}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                            {% else %}
-                            <tr>
-                                {% for col in row %}
-                                <td>
-                                    {{ col }}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endif %}
+                    <figure>
+                        {{ display_image(b.figure.path, b.figure.data) }}
+                        <figcaption>
+                            <strong>Figure {{ i.value }}</strong>. The rate
+                            per 1000 patients in the selected population for
+                            the measure of interest, broken down by
+                            {{ b.title }}
+                        </figcaption>
+                        {% set i.value = i.value +1 %}
+                    </figure>
+                </section>
+                {% endfor %}
 
-                            {% endfor %}
-                        </table>
-                    </div>
-                    <div>
-                        <p><strong>Table 3</strong>. The top 5 most common codes
-                            recorded for codelist 2 ({{ codelist_2_name }}).</p>
-                        <table border="1">
-                            {% for row in top_5_2_data %}
-
-                            {% if loop.first %}
-                            <tr>
-                                {% for col in row %}
-                                <th>
-                                    {{ col }}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                            {% else %}
-                            <tr>
-                                {% for col in row %}
-                                <td>
-                                    {{ col }}
-                                </td>
-                                {% endfor %}
-                            </tr>
-                            {% endif %}
-
-                            {% endfor %}
-                        </table>
-                    </div>
-                </div>
-                {% if breakdowns|length >0 %}
-                <div id="breakdowns">
-                    <h2>
-                        Demographic breakdowns
-                    </h2>
-                    <p>
-                        The figures below show the monthly rate per 1000
-                        patients for the measure described above, broken down by
-                        {% for b in breakdowns %}
-                        <span>
-                            {{ b.title|lower }}
-                            {% if not loop.last %},
-                            {% endif %}
-                        </span>
-                        {% endfor %}.
-                    </p>
-
-                    <div>
-
-                        {% set i=namespace(value=3) %}
-                        {% for b in breakdowns %}
-                        <div id="{{ b.title }}">
-                            <h3>Breakdown by {{ b.title }}</h3>
-                            <p>{{ b.description }}</p>
-                            {% if b.link %}
-                            <p><a href="{{ b.link }}">{{ b.link_description }}</a></p>
-                            {% endif %}
-                            {{ display_image(b.figure.path, b.figure.data) }}
-                            <p><strong>Figure {{ i.value }}</strong>. The rate
-                                per 1000 patients in the selected population for
-                                the measure of interest, broken down by
-                                {{b.title}}</p>
-                            {% set i.value = i.value +1 %}
-                        </div>
-
-                        {% endfor %}
-                    </div>
-
-                </div>
-                {% endif %}
-            </div>
-        </div>
+            </section>
+            {% endif %}
+        </main>
     </body>
-
 </html>

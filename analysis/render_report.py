@@ -21,7 +21,7 @@ def display_image(src, data):
     mtype, _ = mimetypes.guess_type(str(src))
 
     return Markup(
-        f'<img src="data:{mtype};base64, {encoded}" title="Image generated from file: {data}"/>'
+        f'<img src="data:{mtype};base64,{encoded}" title="Image generated from file: {data}">'
     )
 
 
@@ -56,7 +56,7 @@ def data_from_json(path):
 def get_data(
     output_dir,
     population="all",
-    breakdowns="",
+    breakdowns=[],
     codelist_1_name="",
     codelist_1_link="",
     codelist_2_name="",
@@ -72,7 +72,7 @@ def get_data(
     Args:
         output_dir (str): the output directory all the files are in
         population (str): population of the report
-        breakdowns (str): comma delimited string of demographic breakdowns
+        breakdowns (list): list of demographic breakdowns
         codelist_1_name (str): name of the first codelist
         codelist_1_link (str): link to the first codelist (OpenCodelists)
         codelist_2_name (str): name of the second codelist
@@ -85,11 +85,6 @@ def get_data(
     Returns:
         dict containing the data
     """
-
-    if breakdowns != "":
-        breakdowns = breakdowns.split(",")
-    else:
-        breakdowns = []
 
     codelist_url_root = "https://opencodelists.org/codelist/"
     codelist_1_link = codelist_url_root + codelist_1_link
@@ -240,7 +235,7 @@ def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--population", type=str, default="all")
-    parser.add_argument("--breakdowns", type=str, default="")
+    parser.add_argument("--breakdowns", action="append", default=[])
     parser.add_argument("--start-date", type=str, default="")
     parser.add_argument("--end-date", type=str, default="")
     parser.add_argument("--codelist-1-name", type=str, default="")

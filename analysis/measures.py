@@ -89,6 +89,8 @@ def calculate_group_counts(df, breakdown, date):
     counts["date"] = date
     counts["group"] = breakdown
 
+    # reorder the columns
+    counts = counts[["date", "event_measure", "population", "group", "group_value"]]
     return counts
 
 
@@ -129,18 +131,14 @@ def calculate_and_redact_values(df):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--breakdowns", type=str, required=True)
-    parser.add_argument("--input_dir", type=str, required=True)
+    parser.add_argument("--breakdowns", action="append", default=[], required=False)
+    parser.add_argument("--input-dir", type=str, required=True)
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-
-    if not args.breakdowns == "":
-        breakdowns = [x for x in args.breakdowns.split(",")]
-    else:
-        breakdowns = []
+    breakdowns = args.breakdowns
 
     breakdowns.extend(["practice", "event_1_code", "event_2_code"])
 
