@@ -5,7 +5,7 @@ from cohortextractor import (
     params,
     patients,
 )
-from demographics import demographics
+from demographics import get_demographics
 from event_variables import generate_event_variables
 from populations import population_filters
 from report_utils import (
@@ -18,9 +18,11 @@ codelist_1_path = params["codelist_1_path"]
 codelist_1_type = params["codelist_1_type"]
 codelist_2_path = params["codelist_2_path"]
 codelist_2_type = params["codelist_2_type"]
-time_value = int(params["time_value"])
-time_ever = params["time_ever"]
-time_scale = params["time_scale"]
+time_ever = params["time_ever"].lower() == "true"
+time_value = (
+    None if params["time_value"].lower() == "none" else int(params["time_value"])
+)
+time_scale = None if params["time_scale"].lower() == "none" else params["time_scale"]
 time_event = params["time_event"]
 codelist_2_comparison_date = params["codelist_2_comparison_date"]
 codelist_1_frequency = params["codelist_1_frequency"]
@@ -30,15 +32,16 @@ breakdowns = params["breakdowns"]
 # handle dates
 # TODO: handle events in the same period (week, day, month). Requires form changes
 
-
-if time_scale == "weeks":
+if time_scale is None:
+    days = 0
+elif time_scale == "weeks":
     days = time_value * 7
 elif time_scale == "months":
     days = time_value * 28
 elif time_scale == "years":
     days = time_value * 365
 else:
-    raise Exception("Unsupported time scale")
+    raise Exception(f"Unsupported time scale: {time_scale}")
 
 if time_event == "before":
     codelist_2_period_start = f"- {days} days"
@@ -63,6 +66,12 @@ codelist_2_date_range = calculate_variable_windows_codelist_2(
 )
 
 selected_population = population_filters[population_definition]
+
+if population_definition == "children":
+    demographics = get_demographics(children=True)
+else:
+    demographics = get_demographics()
+
 selected_demographics = {k: v for k, v in demographics.items() if k in breakdowns}
 
 study = StudyDefinition(

@@ -1,10 +1,10 @@
-# load each input file and count the number of unique patients and number of events
 import argparse
+import functools
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from report_utils import (
+from analysis.report_utils import (
     drop_zero_practices,
     get_date_input_file,
     match_input_files,
@@ -12,12 +12,29 @@ from report_utils import (
 )
 
 
-def round_to_nearest_100(x):
-    return int(round(x, -2))
+def round_to_nearest(x, *, base):
+    return base * round(x / base)
 
 
-def round_to_nearest_10(x):
-    return int(round(x, -1))
+round_to_nearest_100 = functools.partial(round_to_nearest, base=100)
+round_to_nearest_10 = functools.partial(round_to_nearest, base=10)
+
+
+def get_summary_stats(df):
+    required_columns = {"patient_id", "event_measure", "practice"}
+    assert required_columns.issubset(set(df.columns))
+
+    unique_patients = df["patient_id"].unique()
+    num_events = df["event_measure"].sum()
+    unique_practices = df["practice"].unique()
+    patients_with_events = df.loc[df["event_measure"] == 1, "patient_id"].unique()
+
+    return {
+        "unique_patients": unique_patients,
+        "num_events": num_events,
+        "unique_practices": unique_practices,
+        "patients_with_events": patients_with_events,
+    }
 
 
 def parse_args():
@@ -25,23 +42,6 @@ def parse_args():
     parser.add_argument("--input-dir", type=str, required=True)
     parser.add_argument("--output-dir", type=str, required=True)
     return parser.parse_args()
-
-
-def get_unique_patients(df):
-    return df.loc[:, "patient_id"].unique()
-
-
-def get_number_of_events(df):
-    return df.loc[:, "event_measure"].sum()
-
-
-def get_unique_practices(df):
-    return df.loc[:, "practice"].unique()
-
-
-def get_patients_with_events(df):
-    df_subset = df.loc[df["event_measure"] == 1, ["patient_id", "event_measure"]]
-    return df_subset.loc[:, "patient_id"].unique()
 
 
 def generate_latest_week_range(latest_week_start):
@@ -68,27 +68,22 @@ def main():
     for file in Path(args.input_dir).rglob("*"):
         if match_input_files(file.name):
             date = get_date_input_file(file.name)
-            df = pd.read_csv(file)
+            df = pd.read_feather(file)
             df["date"] = date
-            num_events = get_number_of_events(df)
-            events[date] = num_events
-            unique_patients = get_unique_patients(df)
-            unique_patients_with_events = get_patients_with_events(df)
-            patients.extend(unique_patients)
-            patients_with_events.extend(unique_patients_with_events)
-            unique_practices = get_unique_practices(df)
 
             df_practices_dropped = drop_zero_practices(df, "event_measure")
-            unique_practices_with_events = get_unique_practices(df_practices_dropped)
-
-            practices.extend(unique_practices)
-            practice_with_events.extend(unique_practices_with_events)
+            # TODO: think about whether we should calculate all of the stats on the dropped data or not
+            summary_stats = get_summary_stats(df_practices_dropped)
+            events[date] = summary_stats["num_events"]
+            patients.extend(summary_stats["unique_patients"])
+            patients_with_events.extend(summary_stats["patients_with_events"])
+            practices.extend(summary_stats["unique_practices"])
 
         if match_input_files(file.name, weekly=True):
             date = get_date_input_file(file.name, weekly=True)
-            df = pd.read_csv(file)
+            df = pd.read_feather(file)
             df["date"] = date
-            num_events = get_number_of_events(df)
+            num_events = df.loc[:, "event_measure"].sum()
             events_weekly[date] = num_events
 
     # there should only be one key in events_weekly, but we take the max anyway

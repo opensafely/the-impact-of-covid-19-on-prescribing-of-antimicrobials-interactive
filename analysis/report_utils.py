@@ -65,10 +65,10 @@ def match_input_files(file: str, weekly=False) -> bool:
     """Checks if file name has format outputted by cohort extractor"""
     if weekly:
         pattern = (
-            r"^input_weekly_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.csv.gz"
+            r"^input_weekly_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.feather"
         )
     else:
-        pattern = r"^input_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.csv.gz"
+        pattern = r"^input_20\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\.feather"
     return True if re.match(pattern, file) else False
 
 
@@ -80,14 +80,19 @@ def get_date_input_file(file: str, weekly=False) -> str:
 
     else:
         if weekly:
-            date = re.search(r"input_weekly_(.*).csv.gz", file)
+            date = re.search(r"input_weekly_(.*).feather", file)
         else:
-            date = re.search(r"input_(.*).csv.gz", file)
+            date = re.search(r"input_(.*).feather", file)
         return date.group(1)
 
 
 def plot_measures(
-    df, filename: str, column_to_plot: str, y_label: str, category: str = None
+    df,
+    filename: str,
+    column_to_plot: str,
+    y_label: str,
+    category: str = None,
+    category_order: list = None,
 ):
     """Produce time series plot from measures table. If category is provided, one line is plotted for each sub
     category within the category column. Saves output in 'output' dir as png file.
@@ -96,6 +101,7 @@ def plot_measures(
         column_to_plot: Column name for y-axis values
         y_label: Label to use for y-axis
         category: Name of column indicating different categories, optional
+        category_order: List of categories in order to plot, optional
     """
     if category:
         df[category] = df[category].fillna("Missing")
@@ -103,9 +109,14 @@ def plot_measures(
     _, ax = plt.subplots(figsize=(15, 8))
 
     if category:
-        for unique_category in sorted(df[category].unique()):
-            df_subset = df[df[category] == unique_category].sort_values("date")
-            ax.plot(df_subset["date"], df_subset[column_to_plot])
+        if category_order:
+            for unique_category in category_order:
+                df_subset = df[df[category] == unique_category].sort_values("date")
+                ax.plot(df_subset["date"], df_subset[column_to_plot])
+        else:
+            for unique_category in df[category].unique():
+                df_subset = df[df[category] == unique_category].sort_values("date")
+                ax.plot(df_subset["date"], df_subset[column_to_plot])
     else:
         ax.plot(df["date"], df[column_to_plot])
 
@@ -126,12 +137,20 @@ def plot_measures(
     plt.xticks(rotation="vertical")
 
     if category:
-        ax.legend(
-            sorted(df[category].unique()),
-            bbox_to_anchor=(1.04, 1),
-            loc="upper left",
-            fontsize=20,
-        )
+        if category_order:
+            ax.legend(
+                category_order,
+                bbox_to_anchor=(1.04, 1),
+                loc="upper left",
+                fontsize=20,
+            )
+        else:
+            ax.legend(
+                sorted(df[category].unique()),
+                bbox_to_anchor=(1.04, 1),
+                loc="upper left",
+                fontsize=20,
+            )
 
     ax.margins(x=0)
     ax.yaxis.label.set_size(25)

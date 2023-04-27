@@ -66,6 +66,7 @@ def get_data(
     time_event="",
     start_date="",
     end_date="",
+    time_ever=False,
 ):
     """
     Get data to render the report
@@ -82,6 +83,7 @@ def get_data(
         time_event (str): time event for the report
         start_date (str): start date for the report
         end_date (str): end date for the report
+        time_ever (bool): whether codelist 2 uses time ever
     Returns:
         dict containing the data
     """
@@ -133,7 +135,9 @@ def get_data(
         "age": {
             "title": "Age",
             "link": None,
-            "description": "Age is divided into 10 year age bands.",
+            "description": "Age is divided into those aged between 18-29 and then consecutive 10 year age bands."
+            if population != "children"
+            else "Age is divided into 3 groups: 0-5 years, 6-10 years and 11-17 years.",
             "figure": figures["age"],
         },
         "ethnicity": {
@@ -151,7 +155,7 @@ def get_data(
         },
         "imd": {
             "title": "Index of Multiple Deprivation",
-            "description": "Index of Multiple Deprivation breakdown is presented as quintiles, based on English indices of deprivation 2019. These quintile range from 1 (most deprived) to 5 (least deprived) See the link below for more details.",
+            "description": "Index of Multiple Deprivation (IMD) breakdown is presented as quintiles, based on English indices of deprivation 2019. IMD is defined using the patient's registered address. These quintile range from 1 (most deprived) to 5 (least deprived) See the link below for more details.",
             "link": "https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019",
             "link_description": "English Indices of Deprivation 2019",
             "figure": figures["imd"],
@@ -197,6 +201,7 @@ def get_data(
         "time_value": time_value,
         "time_scale": time_scale,
         "time_event": time_event,
+        "time_ever": time_ever,
     }
     return report_data
 
@@ -245,6 +250,7 @@ def get_parser():
     parser.add_argument("--time-value", type=str, default="")
     parser.add_argument("--time-scale", type=str, default="")
     parser.add_argument("--time-event", type=str, default="")
+    parser.add_argument("--time-ever", type=bool, default=False)
     return parser
 
 

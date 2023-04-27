@@ -36,13 +36,29 @@ def main():
     for breakdown in breakdowns:
         df_subset = df.loc[df["group"] == breakdown, :]
 
-        plot_measures(
-            df_subset,
-            filename=f"{ args.output_dir }/plot_measures_{breakdown}",
-            column_to_plot="value",
-            y_label="Rate per 1000",
-            category="group_value",
-        )
+        if breakdown == "imd":
+            plot_measures(
+                df_subset,
+                filename=f"{ args.output_dir }/plot_measures_{breakdown}",
+                column_to_plot="value",
+                y_label="Rate per 1000",
+                category="group_value",
+                category_order=[
+                    "Most deprived",
+                    "2",
+                    "3",
+                    "4",
+                    "Least deprived",
+                ],
+            )
+        else:
+            plot_measures(
+                df_subset,
+                filename=f"{ args.output_dir }/plot_measures_{breakdown}",
+                column_to_plot="value",
+                y_label="Rate per 1000",
+                category="group_value",
+            )
 
     practice_df = pd.read_csv(
         f"{ args.output_dir }/joined/measure_practice_rate_deciles.csv",

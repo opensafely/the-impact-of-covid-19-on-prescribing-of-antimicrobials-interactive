@@ -151,8 +151,10 @@ def main():
             filters = {
                 "sex": ["M", "F"],
                 "age_band": [
-                    "18-19",
-                    "20-29",
+                    "0-5",
+                    "6-10",
+                    "11-17",
+                    "18-29",
                     "30-39",
                     "40-49",
                     "50-59",
@@ -163,7 +165,7 @@ def main():
             }
             date = get_date_input_file(file.name)
             file_path = str(file.absolute())
-            df = pd.read_csv(file_path).pipe(filter_data, filters).assign(date=date)
+            df = pd.read_feather(file_path).pipe(filter_data, filters).assign(date=date)
 
             total_count = calculate_total_counts(
                 df, date, group="total", group_value="total"

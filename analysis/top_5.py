@@ -82,10 +82,6 @@ def create_top_5_code_table(
         A table of the top `nrows` codes.
     """
 
-    # prevent scientific notation for codes by casting to float then int
-    df[code_column] = df[code_column].astype(float).astype(int)
-    code_df[code_column] = code_df[code_column].astype(float).astype(int)
-
     event_counts = group_low_values(df, "num", code_column, low_count_threshold)
 
     # round
@@ -153,7 +149,7 @@ def main():
     measure_df = pd.read_csv(f"{args.output_dir}/joined/measure_all.csv")
 
     code_df = measure_df.loc[measure_df["group"] == "event_1_code", :]
-    codelist = pd.read_csv(f"{codelist_1_path}")
+    codelist = pd.read_csv(f"{codelist_1_path}", dtype={"code": str})
 
     events_per_code = (
         code_df.groupby("group_value")[["event_measure"]].sum().reset_index()
@@ -178,7 +174,7 @@ def main():
     code_df_2 = measure_df.loc[measure_df["group"] == "event_2_code", :]
 
     # TODO: support vpids?
-    codelist_2 = pd.read_csv(f"{codelist_2_path}")
+    codelist_2 = pd.read_csv(f"{codelist_2_path}", dtype={"code": str})
     events_per_code = (
         code_df_2.groupby("group_value")[["event_measure"]].sum().reset_index()
     )
