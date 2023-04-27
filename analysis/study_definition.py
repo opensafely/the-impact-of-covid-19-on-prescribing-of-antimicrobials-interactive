@@ -20,9 +20,13 @@ codelist_2_path = params["codelist_2_path"]
 codelist_2_type = params["codelist_2_type"]
 time_ever = params["time_ever"].lower() == "true"
 time_value = (
-    None if params["time_value"].lower() == "none" else int(params["time_value"])
+    None
+    if params["time_value"].lower().strip() in ("none", "")
+    else int(params["time_value"])
 )
-time_scale = None if params["time_scale"].lower() == "none" else params["time_scale"]
+time_scale = (
+    None if params["time_scale"].lower() in ("none", "") else params["time_scale"]
+)
 time_event = params["time_event"]
 codelist_2_comparison_date = params["codelist_2_comparison_date"]
 codelist_1_frequency = params["codelist_1_frequency"]
