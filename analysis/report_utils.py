@@ -107,16 +107,35 @@ def plot_measures(
         df[category] = df[category].fillna("Missing")
 
     _, ax = plt.subplots(figsize=(15, 8))
+    palette = sns.color_palette("tab10")
 
     if category:
         if category_order:
             for unique_category in category_order:
                 df_subset = df[df[category] == unique_category].sort_values("date")
-                ax.plot(df_subset["date"], df_subset[column_to_plot])
+
+                sns.lineplot(
+                    x="date",
+                    y=column_to_plot,
+                    data=df_subset,
+                    palette=palette,
+                    ax=ax,
+                    label=unique_category,
+                )
+
         else:
             for unique_category in df[category].unique():
                 df_subset = df[df[category] == unique_category].sort_values("date")
-                ax.plot(df_subset["date"], df_subset[column_to_plot])
+
+                sns.lineplot(
+                    x="date",
+                    y=column_to_plot,
+                    data=df_subset,
+                    palette=palette,
+                    ax=ax,
+                    label=unique_category,
+                )
+
     else:
         ax.plot(df["date"], df[column_to_plot])
 
@@ -133,31 +152,22 @@ def plot_measures(
 
     month_locator = mdates.MonthLocator()
     ax.xaxis.set_major_locator(month_locator)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%B %Y"))
+    ax.xaxis.set_major_locator(mdates.MonthLocator(interval=2))
     plt.xticks(rotation="vertical")
 
     if category:
-        if category_order:
-            ax.legend(
-                category_order,
-                bbox_to_anchor=(1.04, 1),
-                loc="upper left",
-                fontsize=20,
-            )
-        else:
-            ax.legend(
-                sorted(df[category].unique()),
-                bbox_to_anchor=(1.04, 1),
-                loc="upper left",
-                fontsize=20,
-            )
+        ax.legend(
+            bbox_to_anchor=(1.04, 1),
+            loc="upper left",
+            fontsize=20,
+        )
 
     ax.margins(x=0)
     ax.yaxis.label.set_size(25)
     ax.xaxis.label.set_size(25)
     ax.tick_params(axis="both", which="major", labelsize=20)
     plt.tight_layout()
-    plt.style.use("seaborn")
     plt.savefig(f"{filename}.png")
     plt.close()
 
@@ -253,8 +263,6 @@ def deciles_chart(df, filename, period_column=None, column=None, title="", ylabe
         ylabel: the label of the y-axis of the chart
     """
 
-    sns.set_style("darkgrid")
-
     fig, ax = plt.subplots(figsize=(15, 8))
 
     linestyles = {
@@ -277,17 +285,25 @@ def deciles_chart(df, filename, period_column=None, column=None, title="", ylabe
     label_seen = []
     for percentile in range(1, 100):
         data = df[df["percentile"] == percentile]
+        add_label = False
 
         if percentile == 50:
             style = linestyles["median"]
-            label = style["label"]
+            add_label = True
+        elif percentile < 10 or percentile > 90:
+            style = linestyles["percentile"]
+            if "percentile" not in label_seen:
+                label_seen.append("percentile")
+                add_label = True
         else:
             style = linestyles["decile"]
             if "decile" not in label_seen:
                 label_seen.append("decile")
-                label = style["label"]
-            else:
-                label = "_nolegend_"
+                add_label = True
+        if add_label:
+            label = style["label"]
+        else:
+            label = "_nolegend_"
 
         ax.plot(
             data[period_column],

@@ -1,0 +1,35 @@
+{
+  "demographics": [
+    "sex",
+    "age",
+    "ethnicity",
+    "imd",
+    "region"
+  ],
+  "codelist_1": {
+    "label": "Doxycycline (tetracyclines)",
+    "slug": "ukhsa/doxycycline-tetracyclines/4458c45a",
+    "type": "medication",
+    "description": null,
+    "path": "interactive_codelists/codelist_1.csv"
+  },
+  "codelist_2": {
+    "label": "Chronic obstructive pulmonary disease (COPD) codes",
+    "slug": "nhsd-primary-care-domain-refsets/copd_cod/20210127",
+    "type": "event",
+    "description": null,
+    "path": "interactive_codelists/codelist_2.csv"
+  },
+  "filter_population": "adults",
+  "time_value": 10,
+  "time_scale": "years",
+  "time_ever": false,
+  "time_event": "before",
+  "frequency": "monthly",
+  "start_date": "2019-09-01",
+  "end_date": "2024-03-31",
+  "week_of_latest_extract": "2024-04-01",
+  "created_by": "christopher.wood@phc.ox.ac.uk",
+  "repo": "https://github.com/opensafely/the-impact-of-covid-19-on-prescribing-of-antimicrobials-interactive",
+  "id": "01HW38MAP18PWK35KP7T46DST1"
+}

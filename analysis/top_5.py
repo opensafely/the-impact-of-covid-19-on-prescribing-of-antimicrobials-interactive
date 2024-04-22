@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -22,8 +23,8 @@ def group_low_values(df, count_column, code_column, threshold):
         A table with redacted counts
     """
 
-    # get sum of any values <= threshold
-    suppressed_count = df.loc[df[count_column] <= threshold, count_column].sum()
+    # get sum of any values < threshold
+    suppressed_count = df.loc[df[count_column] < threshold, count_column].sum()
     suppressed_df = df.loc[df[count_column] > threshold, count_column]
 
     # if suppressed values >0 ensure total suppressed count > threshold.
@@ -31,16 +32,16 @@ def group_low_values(df, count_column, code_column, threshold):
     if (suppressed_count > 0) | (
         (suppressed_count == 0) & (len(suppressed_df) != len(df))
     ):
-        # redact counts <= threshold
-        df.loc[df[count_column] <= threshold, count_column] = np.nan
+        # redact counts < threshold
+        df.loc[df[count_column] < threshold, count_column] = np.nan
 
         # If all values 0, suppress them
         if suppressed_count == 0:
             df.loc[df[count_column] == 0, :] = np.nan
 
         else:
-            # if suppressed count <= threshold redact further values
-            while suppressed_count <= threshold:
+            # if suppressed count < threshold redact further values
+            while suppressed_count < threshold:
                 suppressed_count += df[count_column].min()
                 df.loc[df[count_column].idxmin(), :] = np.nan
 
@@ -57,7 +58,7 @@ def group_low_values(df, count_column, code_column, threshold):
 
 def round_values(x, base=5):
     rounded = x
-    if isinstance(x, (int, float)):
+    if isinstance(x, (int, float)):  # noqa: UP038
         if np.isnan(x):
             rounded = np.nan
         else:
@@ -137,7 +138,7 @@ def parse_args():
         type=str,
         help="Path to codelist for event 2",
     )
-    parser.add_argument("--output-dir", type=str, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     return args
 
@@ -146,10 +147,10 @@ def main():
     args = parse_args()
     codelist_1_path = args.codelist_1_path
     codelist_2_path = args.codelist_2_path
-    measure_df = pd.read_csv(f"{args.output_dir}/joined/measure_all.csv")
+    measure_df = pd.read_csv(args.output_dir / "measure_all.csv")
 
     code_df = measure_df.loc[measure_df["group"] == "event_1_code", :]
-    codelist = pd.read_csv(f"{codelist_1_path}", dtype={"code": str})
+    codelist = pd.read_csv(codelist_1_path, dtype={"code": str})
 
     events_per_code = (
         code_df.groupby("group_value")[["event_measure"]].sum().reset_index()
@@ -164,17 +165,19 @@ def main():
         low_count_threshold=7,
         rounding_base=7,
     )
-    top_5_code_table.to_csv(
-        f"{args.output_dir}/joined/top_5_code_table_1.csv", index=False
-    )
+    top_5_code_table.to_csv(args.output_dir / "top_5_code_table_1.csv", index=False)
+
+    Path(args.output_dir / "for_checking").mkdir(parents=True, exist_ok=True)
+
     top_5_code_table_with_counts.to_csv(
-        f"{args.output_dir}/joined/top_5_code_table_with_counts_1.csv", index=False
+        args.output_dir / "for_checking/top_5_code_table_with_counts_1.csv",
+        index=False,
     )
 
     code_df_2 = measure_df.loc[measure_df["group"] == "event_2_code", :]
 
     # TODO: support vpids?
-    codelist_2 = pd.read_csv(f"{codelist_2_path}", dtype={"code": str})
+    codelist_2 = pd.read_csv(codelist_2_path, dtype={"code": str})
     events_per_code = (
         code_df_2.groupby("group_value")[["event_measure"]].sum().reset_index()
     )
@@ -185,15 +188,14 @@ def main():
         code_df=codelist_2,
         code_column="code",
         term_column="term",
-        low_count_threshold=7,
-        rounding_base=7,
+        low_count_threshold=10,
+        rounding_base=10,
     )
 
-    top_5_code_table.to_csv(
-        f"{args.output_dir}/joined/top_5_code_table_2.csv", index=False
-    )
+    top_5_code_table.to_csv(args.output_dir / "top_5_code_table_2.csv", index=False)
     top_5_code_table_with_counts.to_csv(
-        f"{args.output_dir}/joined/top_5_code_table_with_counts_2.csv", index=False
+        args.output_dir / "for_checking" / "top_5_code_table_with_counts_2.csv",
+        index=False,
     )
 
 

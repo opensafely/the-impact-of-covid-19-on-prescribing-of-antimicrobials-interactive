@@ -12,27 +12,48 @@ from analysis.report_utils import (
 )
 
 
-def round_to_nearest(x, *, base):
-    return base * round(x / base)
+def redact_and_round(x, *, base):
+    """Redact values less-than 10 and then round values to nearest specified base (either 10 or 100).
+    Default behaviour is to round to nearest 10.
+    """
+
+    assert base in {10, 100}
+
+    if base == 10:
+        decimals = -1
+    else:
+        decimals = -2
+
+    x = x if x >= 10 else 0
+    x = round(x, ndigits=decimals)
+    return int(x)
 
 
-round_to_nearest_100 = functools.partial(round_to_nearest, base=100)
-round_to_nearest_10 = functools.partial(round_to_nearest, base=10)
+redact_and_round_to_nearest_100 = functools.partial(redact_and_round, base=100)
+redact_and_round_to_nearest_10 = functools.partial(redact_and_round, base=10)
 
 
-def get_summary_stats(df):
+def replace_zero_with_redacted(x):
+    return x if x > 0 else "[REDACTED]"
+
+
+def get_summary_stats(df, df_practices_dropped):
     required_columns = {"patient_id", "event_measure", "practice"}
     assert required_columns.issubset(set(df.columns))
+    assert required_columns.issubset(set(df_practices_dropped.columns))
 
     unique_patients = df["patient_id"].unique()
     num_events = df["event_measure"].sum()
-    unique_practices = df["practice"].unique()
     patients_with_events = df.loc[df["event_measure"] == 1, "patient_id"].unique()
+
+    unique_practices = df["practice"].unique()
+    unique_practices_with_events = df_practices_dropped["practice"].unique()
 
     return {
         "unique_patients": unique_patients,
         "num_events": num_events,
         "unique_practices": unique_practices,
+        "unique_practices_with_events": unique_practices_with_events,
         "patients_with_events": patients_with_events,
     }
 
@@ -72,12 +93,13 @@ def main():
             df["date"] = date
 
             df_practices_dropped = drop_zero_practices(df, "event_measure")
-            # TODO: think about whether we should calculate all of the stats on the dropped data or not
-            summary_stats = get_summary_stats(df_practices_dropped)
+
+            summary_stats = get_summary_stats(df, df_practices_dropped)
             events[date] = summary_stats["num_events"]
             patients.extend(summary_stats["unique_patients"])
             patients_with_events.extend(summary_stats["patients_with_events"])
             practices.extend(summary_stats["unique_practices"])
+            practice_with_events.extend(summary_stats["unique_practices_with_events"])
 
         if match_input_files(file.name, weekly=True):
             date = get_date_input_file(file.name, weekly=True)
@@ -89,17 +111,27 @@ def main():
     # there should only be one key in events_weekly, but we take the max anyway
     latest_week = max(events_weekly.keys())
     latest_month = max(events.keys())
-    events_in_latest_week = round_to_nearest_100(events_weekly[latest_week])
-    total_events = round_to_nearest_100(sum(events.values()))
-    total_patients = round_to_nearest_100(len(np.unique(patients)))
-    unique_patients_with_events = round_to_nearest_100(
-        len(np.unique(patients_with_events))
+    events_in_latest_week = replace_zero_with_redacted(
+        redact_and_round_to_nearest_100(events_weekly[latest_week])
     )
-    total_practices = round_to_nearest_10(len(np.unique(practices)))
-    total_practices_with_events = round_to_nearest_10(
+
+    total_events = replace_zero_with_redacted(
+        redact_and_round_to_nearest_100(sum(events.values()))
+    )
+    total_patients = replace_zero_with_redacted(
+        redact_and_round_to_nearest_100(len(np.unique(patients)))
+    )
+    unique_patients_with_events = replace_zero_with_redacted(
+        redact_and_round_to_nearest_100(len(np.unique(patients_with_events)))
+    )
+
+    total_practices = redact_and_round_to_nearest_10(len(np.unique(practices)))
+    total_practices_with_events = redact_and_round_to_nearest_10(
         len(np.unique(practice_with_events))
     )
-    events_in_latest_period = round_to_nearest_100(events[max(events.keys())])
+    events_in_latest_period = replace_zero_with_redacted(
+        redact_and_round_to_nearest_100(events[max(events.keys())])
+    )
 
     save_to_json(
         {

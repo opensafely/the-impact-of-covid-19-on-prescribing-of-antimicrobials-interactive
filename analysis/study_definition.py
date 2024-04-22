@@ -5,6 +5,7 @@ from cohortextractor import (
     params,
     patients,
 )
+from config import CONFIG
 from demographics import get_demographics
 from event_variables import generate_event_variables
 from populations import population_filters
@@ -14,29 +15,25 @@ from report_utils import (
 )
 
 
-codelist_1_path = params["codelist_1_path"]
-codelist_1_type = params["codelist_1_type"]
-codelist_2_path = params["codelist_2_path"]
-codelist_2_type = params["codelist_2_type"]
-time_ever = params["time_ever"].lower() == "true"
-time_value = (
-    None
-    if params["time_value"].lower().strip() in ("none", "")
-    else int(params["time_value"])
-)
-time_scale = (
-    None if params["time_scale"].lower() in ("none", "") else params["time_scale"]
-)
-time_event = params["time_event"]
-codelist_2_comparison_date = params["codelist_2_comparison_date"]
-codelist_1_frequency = params["codelist_1_frequency"]
-population_definition = params["population"]
-breakdowns = params["breakdowns"]
+codelist_1_path = CONFIG["codelist_1"]["path"]
+codelist_1_type = CONFIG["codelist_1"]["type"]
+codelist_2_path = CONFIG["codelist_2"]["path"]
+codelist_2_type = CONFIG["codelist_2"]["type"]
+time_ever = CONFIG["time_ever"]
+time_value = CONFIG["time_value"]
+time_scale = CONFIG["time_scale"]
+time_event = CONFIG["time_event"]
+codelist_2_comparison_date = CONFIG["end_date"]
+population_definition = CONFIG["filter_population"]
+
+# allow --param overrides for weekly run
+codelist_1_frequency = params.get("codelist_1_frequency") or CONFIG["frequency"]
+breakdowns = params.get("breakdowns") or CONFIG["demographics"]
 
 # handle dates
 # TODO: handle events in the same period (week, day, month). Requires form changes
 
-if time_scale is None:
+if time_scale in (None, ""):
     days = 0
 elif time_scale == "weeks":
     days = time_value * 7
